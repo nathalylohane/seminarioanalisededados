@@ -1,0 +1,31 @@
+pacman::p_load(ade4, car, caret, corrplot, dplyr, EnvStats, gvlma, jtools, lm.beta, lmtest, MASS, Metrics, performance, sandwich, simpleboot, SmartEDA, sjPlot, stargazer)
+install.packages('devtools')
+library(devtools)
+devtools::install_github("vdeminstitute/vdemdata")
+devtools::install_github("andybega/states")
+devtools::install_github("andybega/states")
+library(vdemdata)
+library(data.table)
+library(states)
+vdem.raw <- data.table::setDT(vdemdata::vdem)
+vdem.codebook <- data.table::setDT(vdemdata::codebook)
+vdem.codebook <- data.table::setDT(vdemdata::codebook)
+
+# Selecionando as variáveis
+metricas <- c("v2xnp_regcorr", "v2x_jucon", "v2exrescon", "v2jucomp", "v2juhccomp", "v2juhcind", "v2juncind")
+id.vars <- c("country_name", "COWcode", "histname", "codingstart_contemp", "codingend_contemp", "year") # eu acho que a gente não precisa usar isso não 
+vars <- c(id.vars, metricas) #juntandos as duas para transformar em nossas variáveis 
+vdem.raw <- vdem.raw[, ..vars] # tirando tudo do banco de dados que não seja nossas variáveis 
+vdem <- vdem.raw # transformei o nosso objeto em "vdem" só para o nome ficar mais facil 
+
+# Escolhendo o recorte temporal 
+vdem <- vdem[year>1990] 
+
+# Observando a forma dos nossos dados
+ExpData(data=vdem, type=2)
+
+# Tirando os valores faltantes 
+vdem <- vdem[complete.cases(vdem), ] # a gente pode tentar imputar para não ficar tão drastico 
+
+# Fazendo a primeira regressão 
+regvdem <- lm(vdem$v2xnp_regcorr ~ vdem$v2x_jucon + vdem$v2exrescon + vdem$v2jucomp + vdem$v2juhccomp + vdem$v2juhcind + vdem$v2juhcind)
